@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useMemo } from 'react';
-import { createChart, ColorType, IChartApi, CandlestickSeries } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, CandlestickSeries, HistogramSeries, LineSeries } from 'lightweight-charts';
 import { PriceData } from '@/lib/providers/interfaces';
 import { calculateSMA, type IndicatorPoint } from '@/lib/utils/indicators';
 
@@ -83,7 +83,7 @@ export function PriceChart({
 
     // Add volume histogram in separate pane
     if (showVolume && volumeData.length > 0) {
-      const volumeSeries = chart.addHistogramSeries({
+      const volumeSeries = chart.addSeries(HistogramSeries, {
         color: '#26a69a',
         priceFormat: {
           type: 'volume',
@@ -104,7 +104,7 @@ export function PriceChart({
     // Add SMA line series
     if (showSMAs) {
       if (smaData.sma20.length > 0) {
-        const sma20Series = chart.addLineSeries({
+        const sma20Series = chart.addSeries(LineSeries, {
           color: '#3b82f6', // blue
           lineWidth: 2,
           priceLineVisible: false,
@@ -115,7 +115,7 @@ export function PriceChart({
       }
 
       if (smaData.sma50.length > 0) {
-        const sma50Series = chart.addLineSeries({
+        const sma50Series = chart.addSeries(LineSeries, {
           color: '#f97316', // orange
           lineWidth: 2,
           priceLineVisible: false,
@@ -126,7 +126,7 @@ export function PriceChart({
       }
 
       if (smaData.sma200.length > 0) {
-        const sma200Series = chart.addLineSeries({
+        const sma200Series = chart.addSeries(LineSeries, {
           color: '#a855f7', // purple
           lineWidth: 2,
           priceLineVisible: false,

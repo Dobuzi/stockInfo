@@ -19,7 +19,8 @@ test.describe('Chart Enhancements', () => {
 
     // Verify legend shows SMA indicators (desktop only)
     const legend = page.locator('text=SMA 20');
-    if (await page.viewportSize().then(v => v!.width >= 640)) {
+    const viewport = await page.viewportSize();
+    if (viewport && viewport.width >= 640) {
       await expect(legend).toBeVisible();
       await expect(page.locator('text=SMA 50')).toBeVisible();
       await expect(page.locator('text=SMA 200')).toBeVisible();

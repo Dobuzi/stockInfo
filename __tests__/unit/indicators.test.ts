@@ -12,6 +12,7 @@ describe('calculateSMA', () => {
       date.setDate(baseDate.getDate() + i);
 
       data.push({
+        ticker: 'TEST',
         date: date.toISOString().split('T')[0],
         open: 100 + i,
         high: 105 + i,
