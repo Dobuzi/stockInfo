@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { skipWithoutApiKeys } from './helpers';
 
 test.describe('Portfolio Tracking', () => {
+  // Skip all tests in this suite if API keys are not configured
+  test.skip(skipWithoutApiKeys() !== false, skipWithoutApiKeys() as string);
   test('complete portfolio management flow', async ({ page }) => {
     await page.goto('/');
 

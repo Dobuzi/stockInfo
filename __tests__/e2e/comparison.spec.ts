@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { skipWithoutApiKeys } from './helpers';
 
 test.describe('Comparison Feature', () => {
+  // Skip all tests in this suite if API keys are not configured
+  test.skip(skipWithoutApiKeys() !== false, skipWithoutApiKeys() as string);
   test('should switch from detail to comparison view when adding second ticker', async ({ page }) => {
     await page.goto('/');
 
