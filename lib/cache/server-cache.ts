@@ -6,7 +6,7 @@ export const cachePrices = (
   fn: () => Promise<any>
 ) =>
   unstable_cache(fn, [`prices-${ticker}-${range}`], {
-    revalidate: 300, // 5 minutes
+    revalidate: 120, // 2 minutes (optimized for free-tier APIs)
     tags: [`prices`, `ticker-${ticker}`],
   })();
 
@@ -27,12 +27,12 @@ export const cacheNews = (
   fn: () => Promise<any>
 ) =>
   unstable_cache(fn, [`news-${ticker}-${window}`], {
-    revalidate: 900, // 15 minutes
+    revalidate: 600, // 10 minutes (balance freshness with API limits)
     tags: [`news`, `ticker-${ticker}`],
   })();
 
 export const cacheOverview = (ticker: string, fn: () => Promise<any>) =>
   unstable_cache(fn, [`overview-${ticker}`], {
-    revalidate: 86400, // 24 hours
+    revalidate: 21600, // 6 hours (fundamentals change slowly)
     tags: [`overview`, `ticker-${ticker}`],
   })();

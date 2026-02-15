@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AlphaVantageProvider } from '@/lib/providers/alpha-vantage';
+import { getOverviewProvider } from '@/lib/providers/factory';
 import { validateTicker, normalizeTicker } from '@/lib/utils/validation';
 import { cacheOverview } from '@/lib/cache/server-cache';
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const provider = new AlphaVantageProvider();
+    const provider = getOverviewProvider();
 
     const data = await cacheOverview(ticker, async () => {
       return await provider.getOverview(ticker);
@@ -37,25 +37,29 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Overview API error:', error);
 
-    if (error instanceof Error) {
-      if (error.message.includes('rate limit')) {
-        return NextResponse.json(
-          { error: 'API rate limit exceeded. Please try again later.' },
-          { status: 429 }
-        );
-      }
+    let errorMessage = 'Failed to fetch overview data';
+    let statusCode = 500;
 
-      if (error.message.includes('Invalid ticker')) {
-        return NextResponse.json(
-          { error: 'Invalid or unknown ticker symbol' },
-          { status: 404 }
-        );
+    if (error instanceof Error) {
+      if (error.message.includes('rate limit') || error.message.includes('API limit reached')) {
+        errorMessage = 'API rate limit exceeded. Please try again later.';
+        statusCode = 429;
+      } else if (error.message.includes('Invalid ticker')) {
+        errorMessage = 'Invalid or unknown ticker symbol';
+        statusCode = 404;
+      } else if (error.message.includes('API_KEY') || error.message.includes('not set')) {
+        errorMessage = 'Overview service configuration error. Please check API keys.';
+        statusCode = 503;
       }
     }
 
     return NextResponse.json(
-      { error: 'Failed to fetch overview data' },
-      { status: 500 }
+      {
+        error: errorMessage,
+        ticker,
+        provider: process.env.OVERVIEW_PROVIDER || 'fmp'
+      },
+      { status: statusCode }
     );
   }
 }

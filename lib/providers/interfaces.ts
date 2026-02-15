@@ -63,6 +63,7 @@ export interface IOverviewProvider {
 }
 
 // Provider factory return types
-export type PriceProviderType = 'alpha_vantage';
+export type PriceProviderType = 'alpha_vantage' | 'finnhub' | 'stooq';
 export type FinancialProviderType = 'fmp' | 'alpha_vantage';
-export type NewsProviderType = 'finnhub';
+export type NewsProviderType = 'finnhub' | 'gdelt';
+export type OverviewProviderType = 'alpha_vantage' | 'fmp';
