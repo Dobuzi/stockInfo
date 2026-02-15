@@ -5,6 +5,7 @@ A production-quality stock dashboard built with Next.js, TypeScript, and Tailwin
 ## Features
 
 - 📈 **Interactive Price Charts** - Candlestick charts with multiple time ranges (1W-MAX)
+- 🔄 **Smart Comparison View** - Side-by-side fundamental metrics comparison (auto-switches when 2+ tickers added)
 - 📊 **Financial Statements** - Income statements, balance sheets, and cash flow with computed metrics
 - 📰 **News Feed** - Latest news with sentiment analysis (positive/neutral/negative)
 - 🌙 **Dark Mode** - Full dark mode support
@@ -78,6 +79,23 @@ npm run start
 - **AAPL** - Apple (normal ticker, full data availability)
 - **TSLA** - Tesla (high volatility, frequent news)
 - **BRK.B** - Berkshire Hathaway (special character handling)
+
+## Using Comparison View
+
+The dashboard intelligently switches between detail and comparison views:
+
+1. **Add 1 ticker** → Detail view (charts, financials, news)
+2. **Add 2+ tickers** → Auto-switch to comparison table
+3. **Click any ticker chip** → View details for that ticker
+4. **Click selected chip again** → Return to comparison view
+
+**Comparison metrics include:**
+- Company info (sector, industry, market cap)
+- Valuation (P/E, P/B, PEG ratio, EV/EBITDA)
+- Profitability (margins, ROE, ROA)
+- Growth (revenue growth, earnings growth)
+- Financial health (debt ratios, liquidity ratios)
+- Dividends (yield, payout ratio)
 
 ## API Limitations
 
