@@ -42,6 +42,31 @@ Browser → React Components → React Query Hooks → API Routes → Providers 
 - **Client-Side Caching:** React Query handles client-side data fetching with 1-minute stale time
 - **Resilience:** All provider calls wrapped in retry logic with exponential backoff and circuit breaker
 
+### Technical Indicators
+
+**SMA Calculation (`lib/utils/indicators.ts`):**
+- Simple moving averages calculated client-side from OHLC data
+- No additional API calls required
+- Memoized for performance (`useMemo` in component)
+
+**Pattern:**
+```typescript
+// Calculate SMA
+const sma20 = calculateSMA(priceData, 20);
+
+// Memoized in component
+const smaData = useMemo(() => ({
+  sma20: calculateSMA(data, 20),
+  sma50: calculateSMA(data, 50),
+  sma200: calculateSMA(data, 200),
+}), [data]);
+```
+
+**Chart Multi-Pane Layout:**
+- Top pane (70%): Price candlesticks + SMA overlays
+- Bottom pane (30%): Volume histogram
+- Uses lightweight-charts v5 multi-series capability
+
 ### API Routes
 
 - `GET /api/prices?ticker=AAPL&range=1M` - Stock prices with OHLC data
