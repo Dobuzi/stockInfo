@@ -42,6 +42,30 @@ Browser → React Components → React Query Hooks → API Routes → Providers 
 - **Client-Side Caching:** React Query handles client-side data fetching with 1-minute stale time
 - **Resilience:** All provider calls wrapped in retry logic with exponential backoff and circuit breaker
 
+### Portfolio State Management
+
+**Pattern:**
+```typescript
+// Portfolio stored in localStorage
+const { holdings, addHolding, updateHolding, removeHolding } = usePortfolio();
+
+// Fetch current prices
+const priceQueries = holdings.map(h => usePrices(h.ticker, '1D'));
+
+// Calculate P/L
+const pnl = calculateHoldingPnL({
+  quantity: holding.quantity,
+  avgCost: holding.avgCost,
+  currentPrice: currentPrice,
+});
+```
+
+**Data Flow:**
+- Holdings stored in localStorage (`stock-dashboard-portfolio`)
+- Current prices fetched on-demand using existing `usePrices` hook
+- P/L calculated client-side with utilities in `lib/utils/portfolio.ts`
+- React Query caching applies (5min stale time for prices)
+
 ### API Routes
 
 - `GET /api/prices?ticker=AAPL&range=1M` - Stock prices with OHLC data

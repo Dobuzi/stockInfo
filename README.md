@@ -4,7 +4,9 @@ A production-quality stock dashboard built with Next.js, TypeScript, and Tailwin
 
 ## Features
 
-- 📈 **Interactive Price Charts** - Candlestick charts with multiple time ranges (1W-MAX)
+- 📈 **Interactive Price Charts** - Candlestick charts with volume bars and moving averages (20/50/200-day SMAs)
+- 💼 **Portfolio Tracking** - Track holdings, calculate P/L, visualize allocation
+- 🔄 **Smart Comparison View** - Side-by-side fundamental metrics comparison
 - 📊 **Financial Statements** - Income statements, balance sheets, and cash flow with computed metrics
 - 📰 **News Feed** - Latest news with sentiment analysis (positive/neutral/negative)
 - 🌙 **Dark Mode** - Full dark mode support
@@ -79,6 +81,29 @@ npm run start
 - **TSLA** - Tesla (high volatility, frequent news)
 - **BRK.B** - Berkshire Hathaway (special character handling)
 
+## Portfolio Tracking
+
+Track your stock investments and monitor performance:
+
+**Adding Holdings:**
+1. Click "Portfolio" tab
+2. Click "Add Holding"
+3. Enter ticker, quantity, and average cost
+4. Save
+
+**Viewing Performance:**
+- Total portfolio value
+- Total gain/loss (dollar and percentage)
+- Individual holding P/L
+- Portfolio allocation (pie chart)
+
+**Managing Holdings:**
+- Edit quantity or cost by clicking "Edit"
+- Delete holdings with confirmation
+- Holdings persist across sessions (localStorage)
+
+**Note:** Current prices refresh automatically every 5 minutes. P/L calculations are client-side for instant updates.
+
 ## API Limitations
 
 - **Alpha Vantage:** 25 calls/day (free tier)
@@ -96,13 +121,15 @@ npm run start
 │   ├── charts/           # Price & comparison charts
 │   ├── financials/       # Financial tables & metrics
 │   ├── news/             # News list & filters
+│   ├── portfolio/        # Portfolio tracking components
 │   ├── ticker/           # Ticker input & chips
 │   └── ui/               # Base UI components
 ├── lib/
-│   ├── hooks/            # React Query hooks
+│   ├── hooks/            # React Query hooks & portfolio hook
 │   ├── providers/        # API provider implementations
 │   ├── transformers/     # Data transformation logic
-│   └── utils/            # Utilities (retry, formatting, validation)
+│   ├── types/            # TypeScript type definitions
+│   └── utils/            # Utilities (retry, formatting, validation, portfolio)
 └── __tests__/            # Unit & E2E tests
 ```
 
