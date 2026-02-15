@@ -19,22 +19,23 @@ export function TickerChips({ tickers, onRemove, selectedTicker, onSelect }: Tic
   return (
     <div className="flex flex-wrap gap-2">
       {tickers.map((ticker) => (
-        <div
-          key={ticker}
-          className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
-            selectedTicker === ticker
-              ? 'bg-blue-100 dark:bg-blue-900 border-blue-500'
-              : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
-          } cursor-pointer`}
-          onClick={() => onSelect?.(ticker)}
-        >
-          <span className="font-medium">{ticker}</span>
+        <div key={ticker} className="flex items-center gap-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(ticker);
-            }}
-            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+            onClick={() => onSelect?.(ticker)}
+            className={`
+              px-3 py-1 rounded-full text-sm font-medium transition-all
+              ${selectedTicker === ticker
+                ? 'bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }
+            `}
+          >
+            {ticker}
+          </button>
+          <button
+            onClick={() => onRemove(ticker)}
+            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 text-xl font-bold"
+            aria-label={`Remove ${ticker}`}
           >
             ×
           </button>

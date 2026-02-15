@@ -1,15 +1,17 @@
 import {
   IPriceProvider,
   IFinancialProvider,
+  IOverviewProvider,
   PriceData,
   TimeRange,
   FinancialStatement,
 } from './interfaces';
 import { withRetry, CircuitBreaker } from '@/lib/utils/retry';
+import { transformOverview, type OverviewData } from '@/lib/transformers/overview';
 
 const circuitBreaker = new CircuitBreaker();
 
-export class AlphaVantageProvider implements IPriceProvider, IFinancialProvider {
+export class AlphaVantageProvider implements IPriceProvider, IFinancialProvider, IOverviewProvider {
   private readonly apiKey: string;
   private readonly baseUrl = 'https://www.alphavantage.co/query';
 
@@ -201,6 +203,37 @@ export class AlphaVantageProvider implements IPriceProvider, IFinancialProvider 
       cashflowFromInvestment: parseFloat(stmt.cashflowFromInvestment || '0'),
       cashflowFromFinancing: parseFloat(stmt.cashflowFromFinancing || '0'),
     }));
+  }
+
+  async getOverview(ticker: string): Promise<OverviewData> {
+    const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+    if (!apiKey) {
+      throw new Error('ALPHA_VANTAGE_API_KEY is required');
+    }
+
+    const normalizedTicker = ticker.replace('-', '.');
+    const url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${normalizedTicker}&apikey=${apiKey}`;
+
+    return circuitBreaker.execute(async () => {
+      return withRetry(async () => {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Alpha Vantage API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data['Error Message']) {
+          throw new Error(`Invalid ticker: ${ticker}`);
+        }
+
+        if (data['Note']) {
+          throw new Error('API rate limit exceeded');
+        }
+
+        return transformOverview(data);
+      });
+    });
   }
 
   private filterByRange(prices: PriceData[], range: TimeRange): PriceData[] {

@@ -30,3 +30,9 @@ export const cacheNews = (
     revalidate: 900, // 15 minutes
     tags: [`news`, `ticker-${ticker}`],
   })();
+
+export const cacheOverview = (ticker: string, fn: () => Promise<any>) =>
+  unstable_cache(fn, [`overview-${ticker}`], {
+    revalidate: 86400, // 24 hours
+    tags: [`overview`, `ticker-${ticker}`],
+  })();

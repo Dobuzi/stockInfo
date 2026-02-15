@@ -37,10 +37,29 @@ Browser → React Components → React Query Hooks → API Routes → Providers 
 
 ### Key Patterns
 
-- **Provider Adapter Pattern:** All external API calls go through provider interfaces (`IPriceProvider`, `IFinancialProvider`, `INewsProvider`)
-- **Server-Side Caching:** API routes use Next.js `unstable_cache` with different TTLs (prices: 5min, financials: 24h, news: 15min)
+- **Provider Adapter Pattern:** All external API calls go through provider interfaces (`IPriceProvider`, `IFinancialProvider`, `INewsProvider`, `IOverviewProvider`)
+- **Server-Side Caching:** API routes use Next.js `unstable_cache` with different TTLs (prices: 5min, financials: 24h, news: 15min, overview: 24h)
 - **Client-Side Caching:** React Query handles client-side data fetching with 1-minute stale time
 - **Resilience:** All provider calls wrapped in retry logic with exponential backoff and circuit breaker
+
+### Comparison Feature Components
+
+**`components/comparison/ComparisonTable.tsx`**
+- Main comparison table component
+- Fetches overview data for all tickers in parallel using `useOverview` hook
+- Displays 6 metric sections with 27+ metrics
+- Handles loading states, errors, and missing data gracefully
+
+**`components/comparison/MetricRow.tsx`**
+- Individual metric row component
+- Formats values based on type (number, percent, currency)
+- Shows "N/A" for missing data
+
+**View Switching Logic (`app/page.tsx`):**
+- `showComparison = tickers.length >= 2 && !selectedTicker`
+- `showDetail = tickers.length >= 1 && selectedTicker`
+- Auto-selects first ticker when added
+- Clears selection when going from 1 to 2+ tickers
 
 ### Technical Indicators
 
@@ -72,6 +91,7 @@ const smaData = useMemo(() => ({
 - `GET /api/prices?ticker=AAPL&range=1M` - Stock prices with OHLC data
 - `GET /api/financials?ticker=AAPL&statement=income&period=annual` - Financial statements
 - `GET /api/news?ticker=AAPL&window=7d` - Company news with sentiment
+- `GET /api/overview?ticker=AAPL` - Company overview with fundamental metrics
 
 ### Data Providers
 

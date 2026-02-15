@@ -103,6 +103,23 @@ The price charts include essential technical analysis tools:
 - **TSLA** - Tesla (high volatility, frequent news)
 - **BRK.B** - Berkshire Hathaway (special character handling)
 
+## Using Comparison View
+
+The dashboard intelligently switches between detail and comparison views:
+
+1. **Add 1 ticker** → Detail view (charts, financials, news)
+2. **Add 2+ tickers** → Auto-switch to comparison table
+3. **Click any ticker chip** → View details for that ticker
+4. **Click selected chip again** → Return to comparison view
+
+**Comparison metrics include:**
+- Company info (sector, industry, market cap)
+- Valuation (P/E, P/B, PEG ratio, EV/EBITDA)
+- Profitability (margins, ROE, ROA)
+- Growth (revenue growth, earnings growth)
+- Financial health (debt ratios, liquidity ratios)
+- Dividends (yield, payout ratio)
+
 ## API Limitations
 
 - **Alpha Vantage:** 25 calls/day (free tier)
@@ -120,13 +137,15 @@ The price charts include essential technical analysis tools:
 │   ├── charts/           # Price & comparison charts
 │   ├── financials/       # Financial tables & metrics
 │   ├── news/             # News list & filters
+│   ├── portfolio/        # Portfolio tracking components
 │   ├── ticker/           # Ticker input & chips
 │   └── ui/               # Base UI components
 ├── lib/
-│   ├── hooks/            # React Query hooks
+│   ├── hooks/            # React Query hooks & portfolio hook
 │   ├── providers/        # API provider implementations
 │   ├── transformers/     # Data transformation logic
-│   └── utils/            # Utilities (retry, formatting, validation)
+│   ├── types/            # TypeScript type definitions
+│   └── utils/            # Utilities (retry, formatting, validation, portfolio)
 └── __tests__/            # Unit & E2E tests
 ```
 
