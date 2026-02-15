@@ -155,5 +155,31 @@ export function PriceChart({
     };
   }, [data, height, showVolume, volumeData, showSMAs, smaData]);
 
-  return <div ref={chartContainerRef} className="w-full" />;
+  return (
+    <div className="w-full relative">
+      <div ref={chartContainerRef} className="w-full" />
+      {showSMAs && (smaData.sma20.length > 0 || smaData.sma50.length > 0 || smaData.sma200.length > 0) && (
+        <div className="absolute top-2 right-2 bg-white/80 dark:bg-gray-800/80 rounded px-3 py-2 text-xs backdrop-blur-sm hidden sm:block">
+          {smaData.sma20.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="inline-block w-3 h-0.5 bg-blue-500" />
+              <span className="text-gray-700 dark:text-gray-300">SMA 20</span>
+            </div>
+          )}
+          {smaData.sma50.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="inline-block w-3 h-0.5 bg-orange-500" />
+              <span className="text-gray-700 dark:text-gray-300">SMA 50</span>
+            </div>
+          )}
+          {smaData.sma200.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-0.5 bg-purple-500" />
+              <span className="text-gray-700 dark:text-gray-300">SMA 200</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
