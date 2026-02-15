@@ -92,16 +92,23 @@ export async function GET(request: NextRequest) {
     if (error.message.includes('Invalid ticker')) {
       errorMessage = 'Ticker not found';
       statusCode = 404;
-    } else if (error.message.includes('rate limit')) {
+    } else if (error.message.includes('rate limit') || error.message.includes('API limit reached')) {
       errorMessage = 'API rate limit exceeded. Please try again later.';
       statusCode = 429;
     } else if (error.message.includes('No') && error.message.includes('data available')) {
       errorMessage = `${statement} data not available for this ticker`;
       statusCode = 404;
+    } else if (error.message.includes('API_KEY') || error.message.includes('not set')) {
+      errorMessage = 'Financial data service configuration error. Please check API keys.';
+      statusCode = 503;
     }
 
     return NextResponse.json(
-      { error: errorMessage, ticker },
+      {
+        error: errorMessage,
+        ticker,
+        provider: process.env.FINANCIAL_PROVIDER || 'fmp'
+      },
       { status: statusCode }
     );
   }

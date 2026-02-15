@@ -25,9 +25,14 @@ A production-quality stock dashboard built with Next.js, TypeScript, and Tailwin
 
 ### Prerequisites
 
-Get free API keys from:
-- [Alpha Vantage](https://www.alphavantage.co/support/#api-key) (prices & financials)
-- [Finnhub](https://finnhub.io/register) (news)
+**Recommended Setup (Free Tier Optimized):**
+- [Financial Modeling Prep](https://financialmodelingprep.com/developer/docs/) - 250 calls/day (overview & financials)
+- [Finnhub](https://finnhub.io/register) - 60 calls/minute (price data)
+- [GDELT](https://www.gdeltproject.org/) - Unlimited, no key required (news)
+- [Stooq](https://stooq.com/) - Unlimited, no key required (EOD price fallback)
+
+**Optional (Legacy/Fallback):**
+- [Alpha Vantage](https://www.alphavantage.co/support/#api-key) - 25 calls/day (all data types)
 
 ### Installation
 
@@ -43,8 +48,12 @@ cp .env.example .env.local
 
 3. Add your API keys to `.env.local`:
 ```bash
-ALPHA_VANTAGE_API_KEY=your_key_here
-FINNHUB_API_KEY=your_key_here
+# Recommended for optimal free-tier usage
+FMP_API_KEY=your_fmp_key_here
+FINNHUB_API_KEY=your_finnhub_key_here
+
+# Optional: Legacy provider (fallback)
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 ```
 
 4. Run development server:
@@ -120,12 +129,39 @@ The dashboard intelligently switches between detail and comparison views:
 - Financial health (debt ratios, liquidity ratios)
 - Dividends (yield, payout ratio)
 
-## API Limitations
+## API Configuration & Providers
 
-- **Alpha Vantage:** 25 calls/day (free tier)
-- **Finnhub:** 60 calls/minute (free tier)
-- Cached data shown when rate limits exceeded
-- 15-20 minute delay on price data (not real-time)
+The dashboard uses a **multi-provider architecture** optimized for free-tier APIs:
+
+### Default Configuration (Recommended)
+- **Prices:** Finnhub (60/min) → Stooq fallback (no key, EOD only)
+- **Overview:** FMP (250/day)
+- **Financials:** FMP (250/day)
+- **News:** GDELT (unlimited, no key)
+
+### Provider Customization
+Set environment variables to override defaults:
+```bash
+PRICE_PROVIDER=finnhub      # Options: finnhub, stooq, alpha_vantage
+OVERVIEW_PROVIDER=fmp        # Options: fmp, alpha_vantage
+FINANCIAL_PROVIDER=fmp       # Options: fmp, alpha_vantage
+NEWS_PROVIDER=gdelt          # Options: gdelt, finnhub
+```
+
+### API Limitations
+- **FMP:** 250 calls/day (shared across overview + financials)
+- **Finnhub:** 60 calls/minute (prices or news)
+- **Alpha Vantage:** 25 calls/day (legacy fallback)
+- **GDELT:** Unlimited (no key required)
+- **Stooq:** Unlimited (EOD data, no key required)
+
+### Caching Strategy
+- **Prices:** 2 minutes (near-real-time EOD data)
+- **Overview:** 6 hours (fundamentals change slowly)
+- **Financials:** 24 hours (quarterly/annual updates)
+- **News:** 10 minutes (balance freshness with limits)
+
+Cached data shown when rate limits exceeded. Price data has 15-20 minute delay (not real-time).
 
 ## Project Structure
 
