@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stock Dashboard
+
+A production-quality stock dashboard built with Next.js, TypeScript, and TailwindCSS that visualizes stock prices, financial statements, and news.
+
+## Features
+
+- 📈 **Interactive Price Charts** - Candlestick charts with multiple time ranges (1W-MAX)
+- 📊 **Financial Statements** - Income statements, balance sheets, and cash flow with computed metrics
+- 📰 **News Feed** - Latest news with sentiment analysis (positive/neutral/negative)
+- 🌙 **Dark Mode** - Full dark mode support
+- ⚡ **Fast** - Server-side caching and React Query for optimal performance
+- 📱 **Responsive** - Works on mobile, tablet, and desktop
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** TailwindCSS 4
+- **Charts:** lightweight-charts
+- **Data Fetching:** TanStack Query (React Query)
+- **Testing:** Vitest (unit) + Playwright (E2E)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+Get free API keys from:
+- [Alpha Vantage](https://www.alphavantage.co/support/#api-key) (prices & financials)
+- [Finnhub](https://finnhub.io/register) (news)
+
+### Installation
+
+1. Clone and install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `.env.local` from template:
+```bash
+cp .env.example .env.local
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Add your API keys to `.env.local`:
+```bash
+ALPHA_VANTAGE_API_KEY=your_key_here
+FINNHUB_API_KEY=your_key_here
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run development server:
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
+### Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Run unit tests
+npm run test:unit
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run E2E tests
+npm run test:e2e
 
-## Deploy on Vercel
+# Run E2E tests in UI mode
+npm run test:e2e:ui
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Build for Production
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+npm run start
+```
+
+## Sample Tickers
+
+- **AAPL** - Apple (normal ticker, full data availability)
+- **TSLA** - Tesla (high volatility, frequent news)
+- **BRK.B** - Berkshire Hathaway (special character handling)
+
+## API Limitations
+
+- **Alpha Vantage:** 25 calls/day (free tier)
+- **Finnhub:** 60 calls/minute (free tier)
+- Cached data shown when rate limits exceeded
+- 15-20 minute delay on price data (not real-time)
+
+## Project Structure
+
+```
+├── app/                    # Next.js App Router pages & API routes
+│   ├── api/               # API routes (prices, financials, news)
+│   └── page.tsx           # Main dashboard page
+├── components/            # React components
+│   ├── charts/           # Price & comparison charts
+│   ├── financials/       # Financial tables & metrics
+│   ├── news/             # News list & filters
+│   ├── ticker/           # Ticker input & chips
+│   └── ui/               # Base UI components
+├── lib/
+│   ├── hooks/            # React Query hooks
+│   ├── providers/        # API provider implementations
+│   ├── transformers/     # Data transformation logic
+│   └── utils/            # Utilities (retry, formatting, validation)
+└── __tests__/            # Unit & E2E tests
+```
+
+## License
+
+MIT
