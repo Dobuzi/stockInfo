@@ -4,7 +4,7 @@ A production-quality stock dashboard built with Next.js, TypeScript, and Tailwin
 
 ## Features
 
-- 📈 **Interactive Price Charts** - Candlestick charts with multiple time ranges (1W-MAX)
+- 📈 **Interactive Price Charts** - Candlestick charts with volume bars and moving averages (20/50/200-day SMAs)
 - 🔄 **Smart Comparison View** - Side-by-side fundamental metrics comparison (auto-switches when 2+ tickers added)
 - 📊 **Financial Statements** - Income statements, balance sheets, and cash flow with computed metrics
 - 📰 **News Feed** - Latest news with sentiment analysis (positive/neutral/negative)
@@ -73,6 +73,29 @@ npm run test:e2e:ui
 npm run build
 npm run start
 ```
+
+## Technical Analysis
+
+The price charts include essential technical analysis tools:
+
+**Volume Histogram:**
+- Displayed below price chart in separate pane
+- Green bars: Price closed higher than open (bullish)
+- Red bars: Price closed lower than open (bearish)
+- Helps confirm price movements and identify accumulation/distribution
+
+**Simple Moving Averages (SMAs):**
+- **20-day SMA** (blue): Short-term trend
+- **50-day SMA** (orange): Medium-term trend
+- **200-day SMA** (purple): Long-term trend
+
+**Key Signals:**
+- **Golden Cross:** 50-day crosses above 200-day (bullish signal)
+- **Death Cross:** 50-day crosses below 200-day (bearish signal)
+- Price above all SMAs: Strong uptrend
+- Price below all SMAs: Strong downtrend
+
+**Note:** SMAs are only displayed when sufficient data is available (e.g., 200-day SMA requires 200+ days of price data).
 
 ## Sample Tickers
 
