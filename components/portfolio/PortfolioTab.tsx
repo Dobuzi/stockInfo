@@ -18,7 +18,7 @@ export function PortfolioTab() {
 
   // Fetch current prices for all holdings
   const priceQueries = holdings.map(holding =>
-    usePrices(holding.ticker, '1D')
+    usePrices(holding.ticker, '1W')
   );
 
   const isLoadingPrices = priceQueries.some(q => q.isLoading);

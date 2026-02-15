@@ -48,19 +48,24 @@ export function AllocationChart({ data }: AllocationChartProps) {
             cx="50%"
             cy="50%"
             outerRadius={80}
-            label={({ name, percentage }) => `${name} ${percentage.toFixed(1)}%`}
+            label={(props: any) => {
+              const percentage = props.percentage || 0;
+              const name = props.name || '';
+              return `${name} ${percentage.toFixed(1)}%`;
+            }}
           >
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) =>
-              new Intl.NumberFormat('en-US', {
+            formatter={(value: number | undefined) => {
+              if (value === undefined) return 'N/A';
+              return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
-              }).format(value)
-            }
+              }).format(value);
+            }}
           />
           <Legend />
         </PieChart>
