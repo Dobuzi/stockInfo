@@ -137,13 +137,15 @@ The dashboard intelligently switches between detail and comparison views:
 │   ├── charts/           # Price & comparison charts
 │   ├── financials/       # Financial tables & metrics
 │   ├── news/             # News list & filters
+│   ├── portfolio/        # Portfolio tracking components
 │   ├── ticker/           # Ticker input & chips
 │   └── ui/               # Base UI components
 ├── lib/
-│   ├── hooks/            # React Query hooks
+│   ├── hooks/            # React Query hooks & portfolio hook
 │   ├── providers/        # API provider implementations
 │   ├── transformers/     # Data transformation logic
-│   └── utils/            # Utilities (retry, formatting, validation)
+│   ├── types/            # TypeScript type definitions
+│   └── utils/            # Utilities (retry, formatting, validation, portfolio)
 └── __tests__/            # Unit & E2E tests
 ```
 
