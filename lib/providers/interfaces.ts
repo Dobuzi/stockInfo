@@ -57,6 +57,11 @@ export interface INewsProvider {
   getNews(ticker: string, windowDays: number): Promise<NewsArticle[]>;
 }
 
+// Overview provider interface
+export interface IOverviewProvider {
+  getOverview(ticker: string): Promise<import('@/lib/transformers/overview').OverviewData>;
+}
+
 // Provider factory return types
 export type PriceProviderType = 'alpha_vantage';
 export type FinancialProviderType = 'fmp' | 'alpha_vantage';
