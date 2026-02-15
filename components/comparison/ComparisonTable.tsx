@@ -82,7 +82,144 @@ export function ComparisonTable({ tickers }: ComparisonTableProps) {
             type="currency"
           />
 
-          {/* Valuation Section - will add in next task */}
+          {/* Valuation Metrics Section */}
+          <tr className="bg-gray-100 dark:bg-gray-800">
+            <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
+              Valuation Metrics
+            </td>
+          </tr>
+          <MetricRow
+            label="P/E Ratio"
+            values={data.map(d => d?.peRatio || null)}
+            type="number"
+          />
+          <MetricRow
+            label="Forward P/E"
+            values={data.map(d => d?.forwardPE || null)}
+            type="number"
+          />
+          <MetricRow
+            label="PEG Ratio"
+            values={data.map(d => d?.pegRatio || null)}
+            type="number"
+          />
+          <MetricRow
+            label="Price-to-Book"
+            values={data.map(d => d?.priceToBook || null)}
+            type="number"
+          />
+          <MetricRow
+            label="Price-to-Sales"
+            values={data.map(d => d?.priceToSales || null)}
+            type="number"
+          />
+          <MetricRow
+            label="EV/EBITDA"
+            values={data.map(d => d?.evToEbitda || null)}
+            type="number"
+          />
+
+          {/* Profitability Section */}
+          <tr className="bg-gray-100 dark:bg-gray-800">
+            <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
+              Profitability
+            </td>
+          </tr>
+          <MetricRow
+            label="Profit Margin"
+            values={data.map(d => d?.profitMargin || null)}
+            type="percent"
+          />
+          <MetricRow
+            label="Operating Margin"
+            values={data.map(d => d?.operatingMargin || null)}
+            type="percent"
+          />
+          <MetricRow
+            label="Return on Equity (ROE)"
+            values={data.map(d => d?.returnOnEquity || null)}
+            type="percent"
+          />
+          <MetricRow
+            label="Return on Assets (ROA)"
+            values={data.map(d => d?.returnOnAssets || null)}
+            type="percent"
+          />
+
+          {/* Growth Section */}
+          <tr className="bg-gray-100 dark:bg-gray-800">
+            <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
+              Growth
+            </td>
+          </tr>
+          <MetricRow
+            label="Revenue (TTM)"
+            values={data.map(d => d?.revenue ? formatLargeNumber(d.revenue) : null)}
+          />
+          <MetricRow
+            label="Quarterly Revenue Growth"
+            values={data.map(d => d?.quarterlyRevenueGrowth || null)}
+            type="percent"
+          />
+          <MetricRow
+            label="Quarterly Earnings Growth"
+            values={data.map(d => d?.quarterlyEarningsGrowth || null)}
+            type="percent"
+          />
+          <MetricRow
+            label="EPS (Diluted TTM)"
+            values={data.map(d => d?.eps || null)}
+            type="currency"
+          />
+
+          {/* Financial Health Section */}
+          <tr className="bg-gray-100 dark:bg-gray-800">
+            <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
+              Financial Health
+            </td>
+          </tr>
+          <MetricRow
+            label="Debt-to-Equity"
+            values={data.map(d => d?.debtToEquity || null)}
+            type="number"
+          />
+          <MetricRow
+            label="Current Ratio"
+            values={data.map(d => d?.currentRatio || null)}
+            type="number"
+          />
+          <MetricRow
+            label="Quick Ratio"
+            values={data.map(d => d?.quickRatio || null)}
+            type="number"
+          />
+          <MetricRow
+            label="Book Value Per Share"
+            values={data.map(d => d?.bookValue || null)}
+            type="currency"
+          />
+
+          {/* Dividends Section */}
+          <tr className="bg-gray-100 dark:bg-gray-800">
+            <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
+              Dividends
+            </td>
+          </tr>
+          <MetricRow
+            label="Dividend Yield"
+            values={data.map(d => d?.dividendYield || null)}
+            type="percent"
+          />
+          <MetricRow
+            label="Dividend Per Share"
+            values={data.map(d => d?.dividendPerShare || null)}
+            type="currency"
+          />
+          <MetricRow
+            label="Payout Ratio"
+            values={data.map(d => d?.payoutRatio || null)}
+            type="percent"
+          />
         </tbody>
       </table>
     </div>
