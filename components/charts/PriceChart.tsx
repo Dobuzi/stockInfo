@@ -31,6 +31,18 @@ export function PriceChart({
     }));
   }, [data, showVolume]);
 
+  const smaData = useMemo(() => {
+    if (!showSMAs) {
+      return { sma20: [], sma50: [], sma200: [] };
+    }
+
+    return {
+      sma20: calculateSMA(data, 20),
+      sma50: calculateSMA(data, 50),
+      sma200: calculateSMA(data, 200),
+    };
+  }, [data, showSMAs]);
+
   useEffect(() => {
     if (!chartContainerRef.current || data.length === 0) return;
 
@@ -89,6 +101,42 @@ export function PriceChart({
       volumeSeries.setData(volumeData);
     }
 
+    // Add SMA line series
+    if (showSMAs) {
+      if (smaData.sma20.length > 0) {
+        const sma20Series = chart.addLineSeries({
+          color: '#3b82f6', // blue
+          lineWidth: 2,
+          priceLineVisible: false,
+          lastValueVisible: false,
+          crosshairMarkerVisible: true,
+        });
+        sma20Series.setData(smaData.sma20);
+      }
+
+      if (smaData.sma50.length > 0) {
+        const sma50Series = chart.addLineSeries({
+          color: '#f97316', // orange
+          lineWidth: 2,
+          priceLineVisible: false,
+          lastValueVisible: false,
+          crosshairMarkerVisible: true,
+        });
+        sma50Series.setData(smaData.sma50);
+      }
+
+      if (smaData.sma200.length > 0) {
+        const sma200Series = chart.addLineSeries({
+          color: '#a855f7', // purple
+          lineWidth: 2,
+          priceLineVisible: false,
+          lastValueVisible: false,
+          crosshairMarkerVisible: true,
+        });
+        sma200Series.setData(smaData.sma200);
+      }
+    }
+
     chartRef.current = chart;
 
     const handleResize = () => {
@@ -105,7 +153,7 @@ export function PriceChart({
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [data, height, showVolume, volumeData]);
+  }, [data, height, showVolume, volumeData, showSMAs, smaData]);
 
   return <div ref={chartContainerRef} className="w-full" />;
 }
