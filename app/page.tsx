@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTickers } from '@/lib/hooks/useTickers';
 import { usePrices } from '@/lib/hooks/usePrices';
 import { useFinancials } from '@/lib/hooks/useFinancials';
 import { useNews } from '@/lib/hooks/useNews';
 import { TickerInput } from '@/components/ticker/TickerInput';
 import { TickerChips } from '@/components/ticker/TickerChips';
+import { ComparisonTable } from '@/components/comparison/ComparisonTable';
 import { PriceChart } from '@/components/charts/PriceChart';
 import { RangeSelector } from '@/components/charts/RangeSelector';
 import { FinancialTabs } from '@/components/financials/FinancialTabs';
@@ -21,16 +22,44 @@ import { TimeRange } from '@/lib/providers/interfaces';
 
 export default function DashboardPage() {
   const { tickers, addTicker, removeTicker } = useTickers();
-  const [selectedTicker, setSelectedTicker] = useState<string>('');
+  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const [range, setRange] = useState<TimeRange>('1M');
   const [statement, setStatement] = useState<'income' | 'balance' | 'cashflow'>('income');
   const [newsWindow, setNewsWindow] = useState<'24h' | '7d' | '30d'>('7d');
 
+  // View decision logic
+  const showComparison = tickers.length >= 2 && !selectedTicker;
+  const showDetail = tickers.length >= 1 && selectedTicker;
+  const showEmpty = tickers.length === 0;
+
+  // Auto-select first ticker when added
+  useEffect(() => {
+    if (tickers.length === 1 && !selectedTicker) {
+      setSelectedTicker(tickers[0]);
+    }
+  }, [tickers, selectedTicker]);
+
+  // Clear selection when we have 2+ tickers (auto-switch to comparison)
+  useEffect(() => {
+    if (tickers.length >= 2 && selectedTicker) {
+      setSelectedTicker(null);
+    }
+  }, [tickers.length]);
+
   const activeTicker = selectedTicker || tickers[0] || '';
 
-  const { data: priceData, isLoading: pricesLoading, error: pricesError } = usePrices(activeTicker, range);
-  const { data: financialData, isLoading: financialsLoading, error: financialsError } = useFinancials(activeTicker, statement);
-  const { data: newsData, isLoading: newsLoading, error: newsError } = useNews(activeTicker, newsWindow);
+  const { data: priceData, isLoading: pricesLoading, error: pricesError } = usePrices(
+    showDetail ? selectedTicker! : '',
+    range
+  );
+  const { data: financialData, isLoading: financialsLoading, error: financialsError } = useFinancials(
+    showDetail ? selectedTicker! : '',
+    statement
+  );
+  const { data: newsData, isLoading: newsLoading, error: newsError } = useNews(
+    showDetail ? selectedTicker! : '',
+    newsWindow
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -49,18 +78,41 @@ export default function DashboardPage() {
             <TickerChips
               tickers={tickers}
               onRemove={removeTicker}
-              selectedTicker={activeTicker}
-              onSelect={setSelectedTicker}
+              selectedTicker={selectedTicker || activeTicker}
+              onSelect={(ticker) => {
+                if (selectedTicker === ticker && tickers.length >= 2) {
+                  setSelectedTicker(null); // Deselect → back to comparison
+                } else {
+                  setSelectedTicker(ticker); // Select → show detail
+                }
+              }}
             />
           </div>
         </section>
 
-        {activeTicker && (
+        {showEmpty && (
+          <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              No tickers added yet. Add one above to get started.
+            </p>
+          </section>
+        )}
+
+        {showComparison && (
+          <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              Comparison View
+            </h2>
+            <ComparisonTable tickers={tickers} />
+          </section>
+        )}
+
+        {showDetail && (
           <>
             <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {activeTicker} - Price Chart
+                  {selectedTicker} - Price Chart
                 </h2>
                 <RangeSelector selected={range} onChange={setRange} />
               </div>
