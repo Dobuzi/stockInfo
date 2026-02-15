@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { createChart, ColorType, IChartApi } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, LineSeries } from 'lightweight-charts';
 import { normalizePrices } from '@/lib/transformers/prices';
 import { PriceData } from '@/lib/providers/interfaces';
 
@@ -36,7 +36,7 @@ export function CompareChart({ datasets, height = 400 }: CompareChartProps) {
 
     datasets.forEach((dataset, index) => {
       const normalized = normalizePrices(dataset.data);
-      const lineSeries = chart.addLineSeries({
+      const line = chart.addSeries(LineSeries, {
         color: COLORS[index % COLORS.length],
         lineWidth: 2,
         title: dataset.ticker,
@@ -47,7 +47,7 @@ export function CompareChart({ datasets, height = 400 }: CompareChartProps) {
         value: normalized[i],
       }));
 
-      lineSeries.setData(chartData);
+      line.setData(chartData);
     });
 
     chart.timeScale().fitContent();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { createChart, ColorType, IChartApi } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, CandlestickSeries } from 'lightweight-charts';
 import { PriceData } from '@/lib/providers/interfaces';
 
 interface PriceChartProps {
@@ -31,7 +31,7 @@ export function PriceChart({ data, height = 400 }: PriceChartProps) {
       },
     });
 
-    const candlestickSeries = chart.addCandlestickSeries({
+    const candlestick = chart.addSeries(CandlestickSeries, {
       upColor: '#10b981',
       downColor: '#ef4444',
       borderUpColor: '#10b981',
@@ -48,7 +48,7 @@ export function PriceChart({ data, height = 400 }: PriceChartProps) {
       close: d.close,
     }));
 
-    candlestickSeries.setData(chartData);
+    candlestick.setData(chartData);
     chart.timeScale().fitContent();
 
     chartRef.current = chart;
