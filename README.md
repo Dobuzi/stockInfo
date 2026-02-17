@@ -65,15 +65,23 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Testing
 
+**Unit Tests:**
 ```bash
-# Run unit tests
-npm run test:unit
+npm run test          # Run in watch mode
+npm run test:unit     # Single run
+```
 
-# Run E2E tests
-npm run test:e2e
+**E2E Tests:**
+```bash
+npm run test:e2e      # Run all E2E tests (requires API keys for full suite)
+npm run test:e2e:ui   # Run in UI mode
+```
 
-# Run E2E tests in UI mode
-npm run test:e2e:ui
+**E2E Tests Without API Keys:**
+E2E smoke tests will run without API keys configured. Tests requiring real API data will skip automatically with a helpful message. To run only production smoke tests:
+
+```bash
+npm run test:e2e:prod  # Test against live production deployment
 ```
 
 ### Build for Production
@@ -129,6 +137,69 @@ The dashboard intelligently switches between detail and comparison views:
 - Financial health (debt ratios, liquidity ratios)
 - Dividends (yield, payout ratio)
 
+## API Documentation
+
+### Endpoints
+
+All API routes return JSON responses. Required parameters are validated with helpful error messages.
+
+**GET /api/prices**
+```bash
+curl "https://stock-info-ten.vercel.app/api/prices?ticker=AAPL&range=1M"
+```
+- **Required:** `ticker` (stock symbol), `range` (1D, 1W, 1M, 3M, 6M, 1Y, 5Y, MAX)
+- **Returns:** OHLC price data, current price, day/period change
+
+**GET /api/overview**
+```bash
+curl "https://stock-info-ten.vercel.app/api/overview?ticker=AAPL"
+```
+- **Required:** `ticker`
+- **Returns:** Company fundamentals (PE ratio, market cap, margins, etc.)
+
+**GET /api/financials**
+```bash
+curl "https://stock-info-ten.vercel.app/api/financials?ticker=AAPL&statement=income&period=annual"
+```
+- **Required:** `ticker`, `statement` (income, balance, cashflow)
+- **Optional:** `period` (annual or quarterly, defaults to annual)
+- **Returns:** Financial statement data with computed metrics
+
+**GET /api/news**
+```bash
+curl "https://stock-info-ten.vercel.app/api/news?ticker=AAPL&window=7d"
+```
+- **Required:** `ticker`, `window` (24h, 7d, 30d)
+- **Returns:** News articles with sentiment analysis
+
+### Error Responses
+
+All endpoints return structured error messages:
+```json
+{
+  "error": "Missing or invalid statement parameter",
+  "required": {
+    "statement": ["income", "balance", "cashflow"],
+    "period": ["annual", "quarterly"]
+  },
+  "example": "/api/financials?ticker=AAPL&statement=income&period=annual"
+}
+```
+
+## Health Monitoring
+
+**Production Health Check:**
+```bash
+npm run health:prod                    # Check production deployment
+npm run health:prod -- https://your-deployment-url.app  # Custom URL
+```
+
+The health check script verifies:
+- Main page loads (HTTP 200)
+- All API endpoints respond correctly
+- Static assets are served with proper caching
+- CI-friendly exit codes (0 = pass, 1 = fail)
+
 ## API Configuration & Providers
 
 The dashboard uses a **multi-provider architecture** optimized for free-tier APIs:
@@ -162,6 +233,19 @@ NEWS_PROVIDER=gdelt          # Options: gdelt, finnhub
 - **News:** 10 minutes (balance freshness with limits)
 
 Cached data shown when rate limits exceeded. Price data has 15-20 minute delay (not real-time).
+
+## Deployment
+
+**Platform:** Vercel
+**Production URL:** https://stock-info-ten.vercel.app
+**Auto-Deploy Branch:** `master`
+
+Changes pushed to the `master` branch automatically trigger production deployments on Vercel.
+
+**Environment Variables:**
+Configure in Vercel dashboard:
+- `ALPHA_VANTAGE_API_KEY`
+- `FINNHUB_API_KEY`
 
 ## Project Structure
 

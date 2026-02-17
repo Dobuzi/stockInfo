@@ -24,14 +24,26 @@ export async function GET(request: NextRequest) {
 
   if (!statement || !['income', 'balance', 'cashflow'].includes(statement)) {
     return NextResponse.json(
-      { error: 'Invalid statement type. Use: income, balance, or cashflow' },
+      {
+        error: 'Missing or invalid statement parameter',
+        required: {
+          statement: ['income', 'balance', 'cashflow'],
+          period: ['annual', 'quarterly'] // optional, defaults to 'annual'
+        },
+        example: `/api/financials?ticker=AAPL&statement=income&period=annual`
+      },
       { status: 400 }
     );
   }
 
   if (period !== 'annual' && period !== 'quarterly') {
     return NextResponse.json(
-      { error: 'Invalid period. Use: annual or quarterly' },
+      {
+        error: 'Invalid period parameter',
+        allowed: ['annual', 'quarterly'],
+        received: period,
+        example: `/api/financials?ticker=AAPL&statement=income&period=annual`
+      },
       { status: 400 }
     );
   }

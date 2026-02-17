@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { skipWithoutApiKeys } from './helpers';
 
 test.describe('Chart Enhancements', () => {
+  // Skip all tests in this suite if API keys are not configured
+  test.skip(skipWithoutApiKeys() !== false, skipWithoutApiKeys() as string);
   test('should display volume histogram and SMA indicators', async ({ page }) => {
     await page.goto('/');
 
