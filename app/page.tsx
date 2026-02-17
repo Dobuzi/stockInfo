@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { useTickers } from '@/lib/hooks/useTickers';
 import { usePrices } from '@/lib/hooks/usePrices';
 import { useFinancials } from '@/lib/hooks/useFinancials';
@@ -20,7 +21,10 @@ import { ErrorPanel } from '@/components/ui/ErrorPanel';
 import { DarkModeToggle } from '@/components/ui/DarkModeToggle';
 import { PortfolioTab } from '@/components/portfolio/PortfolioTab';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { useOverview } from '@/lib/hooks/useOverview';
+import { BuffettScoreCard } from '@/components/ui/BuffettScoreCard';
 import { TimeRange } from '@/lib/providers/interfaces';
+import type { OverviewData } from '@/lib/transformers/overview';
 
 export default function DashboardPage() {
   const { tickers, addTicker, removeTicker } = useTickers();
@@ -51,6 +55,28 @@ export default function DashboardPage() {
 
   const activeTicker = selectedTicker || tickers[0] || '';
 
+  // Fetch overviews for all tickers so chips can show Buffett scores.
+  // React Query deduplicates: ComparisonTable hits the same cache keys.
+  const overviewQueries = useQueries({
+    queries: tickers.map(ticker => ({
+      queryKey: ['overview', ticker],
+      queryFn: async () => {
+        const res = await fetch(`/api/overview?ticker=${encodeURIComponent(ticker)}`);
+        if (!res.ok) return null;
+        return res.json() as Promise<{ ticker: string; provider: string; data: OverviewData } | null>;
+      },
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      retry: 2,
+      enabled: tickers.length > 0,
+    })),
+  });
+
+  const overviewsByTicker: Record<string, OverviewData | null> = {};
+  tickers.forEach((ticker, i) => {
+    overviewsByTicker[ticker] = overviewQueries[i]?.data?.data ?? null;
+  });
+
   const { data: priceData, isLoading: pricesLoading, error: pricesError } = usePrices(
     showDetail ? selectedTicker! : '',
     range
@@ -63,6 +89,7 @@ export default function DashboardPage() {
     showDetail ? selectedTicker! : '',
     newsWindow
   );
+  const { data: overviewData } = useOverview(showDetail ? selectedTicker! : '');
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -117,6 +144,7 @@ export default function DashboardPage() {
                       setSelectedTicker(ticker); // Select → show detail
                     }
                   }}
+                  overviews={overviewsByTicker}
                 />
               </div>
             </section>
@@ -166,6 +194,10 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </section>
+
+                {overviewData?.data && (
+                  <BuffettScoreCard overview={overviewData.data} />
+                )}
 
                 <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Financial Statements</h2>
