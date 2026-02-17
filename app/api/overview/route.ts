@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
     let errorMessage = 'Failed to fetch overview data';
     let statusCode = 500;
 
+    const detail = error instanceof Error ? error.message : String(error);
+
     if (error instanceof Error) {
       if (error.message.includes('rate limit') || error.message.includes('API limit reached')) {
         errorMessage = 'API rate limit exceeded. Please try again later.';
@@ -47,7 +49,12 @@ export async function GET(request: NextRequest) {
       } else if (error.message.includes('Invalid ticker')) {
         errorMessage = 'Invalid or unknown ticker symbol';
         statusCode = 404;
-      } else if (error.message.includes('API_KEY') || error.message.includes('not set')) {
+      } else if (
+        error.message.includes('API_KEY') ||
+        error.message.includes('API KEY') ||
+        error.message.includes('not set') ||
+        error.message.includes('Invalid API')
+      ) {
         errorMessage = 'Overview service configuration error. Please check API keys.';
         statusCode = 503;
       }
@@ -56,6 +63,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: errorMessage,
+        detail,
         ticker,
         provider: process.env.OVERVIEW_PROVIDER || 'fmp'
       },
