@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { usePortfolio } from '@/lib/hooks/usePortfolio';
-import { usePrices } from '@/lib/hooks/usePrices';
 import { calculateHoldingPnL, calculatePortfolioTotals, calculateAllocation } from '@/lib/utils/portfolio';
 import { PortfolioSummary } from './PortfolioSummary';
 import { HoldingsTable } from './HoldingsTable';
@@ -16,10 +16,21 @@ export function PortfolioTab() {
   const [editingHolding, setEditingHolding] = useState<Holding | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  // Fetch current prices for all holdings
-  const priceQueries = holdings.map(holding =>
-    usePrices(holding.ticker, '1W')
-  );
+  // Fetch current prices for all holdings using useQueries (Rules of Hooks safe)
+  const priceQueries = useQueries({
+    queries: holdings.map(holding => ({
+      queryKey: ['prices', holding.ticker, '1W'],
+      queryFn: async () => {
+        const response = await fetch(`/api/prices?ticker=${holding.ticker}&range=1W`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to fetch prices');
+        }
+        return response.json();
+      },
+      enabled: !!holding.ticker,
+    })),
+  });
 
   const isLoadingPrices = priceQueries.some(q => q.isLoading);
 
