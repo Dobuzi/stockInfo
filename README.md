@@ -204,11 +204,16 @@ The health check script verifies:
 
 The dashboard uses a **multi-provider architecture** optimized for free-tier APIs:
 
-### Default Configuration (Recommended)
-- **Prices:** Finnhub (60/min) → Stooq fallback (no key, EOD only)
-- **Overview:** FMP (250/day)
-- **Financials:** FMP (250/day)
-- **News:** GDELT (unlimited, no key)
+### Provider Strategy (Automatic Fallback)
+
+Each endpoint tries a primary provider and automatically falls back to a secondary if the primary returns 403, 429, or a network error. Both providers must fail before the endpoint returns 503.
+
+| Endpoint | Primary | Fallback | Key Required |
+|---|---|---|---|
+| Prices | Finnhub (60/min) | Stooq (unlimited, EOD) | Finnhub only |
+| Overview | FMP (250/day) | Alpha Vantage (25/day) | Both |
+| Financials | FMP (250/day) | _(none)_ | FMP |
+| News | GDELT (unlimited) | _(none)_ | None |
 
 ### Provider Customization
 Set environment variables to override defaults:

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPriceProvider } from '@/lib/providers/factory';
+import { StooqProvider } from '@/lib/providers/stooq';
 import { cachePrices } from '@/lib/cache/server-cache';
 import { transformPriceData } from '@/lib/transformers/prices';
 import { validateTicker, normalizeTicker } from '@/lib/utils/validation';
+import { withFallback } from '@/lib/utils/with-fallback';
 import { TimeRange } from '@/lib/providers/interfaces';
 
 export async function GET(request: NextRequest) {
@@ -10,35 +12,41 @@ export async function GET(request: NextRequest) {
   const tickerParam = searchParams.get('ticker');
   const range = (searchParams.get('range') || '1M') as TimeRange;
 
-  // Validation
   if (!tickerParam) {
-    return NextResponse.json(
-      { error: 'Ticker parameter is required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Ticker parameter is required' }, { status: 400 });
   }
 
   const ticker = normalizeTicker(tickerParam);
 
   if (!validateTicker(ticker)) {
-    return NextResponse.json(
-      { error: 'Invalid ticker format' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid ticker format' }, { status: 400 });
   }
 
   try {
-    const provider = getPriceProvider();
+    const primary = getPriceProvider();
+    const stooq = new StooqProvider();
 
-    const prices = await cachePrices(ticker, range, async () => {
-      return await provider.getPrices(ticker, range);
+    const { result: prices, provider } = await cachePrices(ticker, range, async () => {
+      const { result, provider } = await withFallback(
+        { name: process.env.PRICE_PROVIDER ?? 'finnhub', fn: () => primary.getPrices(ticker, range) },
+        { name: 'stooq', fn: () => stooq.getPrices(ticker, range) }
+      );
+      // attach provider name so cache wrapper can pass it through
+      (result as any).__provider = provider;
+      return result;
     });
 
-    const transformed = transformPriceData(prices);
+    const providerUsed = (prices as any).__provider ?? 'unknown';
+    const cleanPrices = prices.filter((p: any) => p.__provider === undefined || true).map(({ __provider, ...p }: any) => p);
+
+    const transformed = transformPriceData(cleanPrices);
+
+    console.log(`[API Prices] ${ticker}/${range} served by ${providerUsed}`);
 
     return NextResponse.json({
       ticker,
       range,
+      provider: providerUsed,
       data: transformed.prices,
       meta: {
         currentPrice: transformed.current,
@@ -49,35 +57,23 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('[API Prices]', error);
 
-    // Map common errors to user-friendly messages
     let errorMessage = 'Failed to fetch price data';
     let statusCode = 500;
 
-    if (error.message.includes('Invalid ticker') || error.message.includes('no_data')) {
+    if (error.message?.includes('Invalid ticker') || error.message?.includes('no_data')) {
       errorMessage = 'Ticker not found';
       statusCode = 404;
-    } else if (error.message.includes('rate limit') || error.message.includes('API limit reached')) {
-      errorMessage = 'API rate limit exceeded. Please try again later.';
-      statusCode = 429;
-    } else if (error.message.includes('Circuit breaker open')) {
-      errorMessage = 'Service temporarily unavailable. Please try again in a minute.';
-      statusCode = 503;
     } else if (
-      error.message.includes('API_KEY') ||
-      error.message.includes('API KEY') ||
-      error.message.includes('not set') ||
-      error.message.includes('Invalid API') ||
-      error.message.includes('Please use an API') ||
-      error.message.includes('Forbidden') ||
-      error.message.includes('403')
+      error.message?.includes('Forbidden') ||
+      error.message?.includes('403') ||
+      error.message?.includes('API_KEY') ||
+      error.message?.includes('API KEY') ||
+      error.message?.includes('not set')
     ) {
-      errorMessage = 'Price service configuration error. Please check API keys.';
+      errorMessage = 'Price service unavailable. Both providers failed.';
       statusCode = 503;
     }
 
-    return NextResponse.json(
-      { error: errorMessage, detail: error.message, ticker, provider: process.env.PRICE_PROVIDER || 'finnhub' },
-      { status: statusCode }
-    );
+    return NextResponse.json({ error: errorMessage, ticker }, { status: statusCode });
   }
 }
