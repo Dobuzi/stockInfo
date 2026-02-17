@@ -7,8 +7,17 @@ const STORAGE_KEY = 'stock-dashboard-tickers';
 export function useTickers() {
   const [tickers, setTickers] = useState<string[]>(() => {
     if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.every(t => typeof t === 'string')) {
+        return parsed;
+      }
+      return [];
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {

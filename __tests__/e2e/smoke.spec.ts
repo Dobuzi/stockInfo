@@ -35,13 +35,38 @@ test.describe('Stock Dashboard Smoke Tests', () => {
     await page.fill('input[placeholder*="ticker"]', 'AAPL');
     await page.click('button:has-text("Add")');
 
-    // Verify ticker chip appears
-    await expect(page.getByText('AAPL')).toBeVisible();
+    // Verify ticker chip (button) appears — use role to avoid matching heading text
+    await expect(page.getByRole('button', { name: 'AAPL', exact: true })).toBeVisible();
 
     // Price chart section should appear (may show error if no API keys)
     await expect(page.getByText(/Price Chart|Error/i)).toBeVisible({ timeout: 5000 });
 
-    // Financial tabs should be visible
-    await expect(page.getByRole('button', { name: /Income|Balance/i })).toBeVisible();
+    // Financial tabs should be visible (first matching tab is sufficient)
+    await expect(page.getByRole('button', { name: /Income Statement/i })).toBeVisible();
+  });
+
+  test('adding BRK-B (special-char ticker) does not crash the app', async ({ page }) => {
+    await page.goto('/');
+
+    // Add first ticker
+    await page.fill('input[placeholder*="ticker"]', 'AAPL');
+    await page.click('button:has-text("Add")');
+    await expect(page.getByRole('button', { name: 'AAPL', exact: true })).toBeVisible();
+
+    // Add BRK-B as second ticker — triggers comparison view (previously crashed via hooks violation)
+    await page.fill('input[placeholder*="ticker"]', 'BRK-B');
+    await page.click('button:has-text("Add")');
+
+    // Chip for BRK-B must be visible
+    await expect(page.getByRole('button', { name: 'BRK-B', exact: true })).toBeVisible();
+
+    // App must not show the Next.js unhandled error screen
+    await expect(page.locator('text="Application error"')).not.toBeVisible();
+
+    // Comparison view or error panel must render (not a blank crash)
+    await expect(
+      page.locator('h2:has-text("Comparison View"), .comparison-table, [class*="ErrorPanel"], [class*="ErrorBoundary"]')
+        .or(page.getByText(/Comparison View|Company Information|Failed to load/i))
+    ).toBeVisible({ timeout: 8000 });
   });
 });

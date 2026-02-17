@@ -9,12 +9,18 @@ describe('validateTicker', () => {
     expect(validateTicker('BRK-B')).toBe(true);
   });
 
+  it('accepts international ticker symbols', () => {
+    expect(validateTicker('005930.KS')).toBe(true); // Samsung KRX
+    expect(validateTicker('RDS.A')).toBe(true);
+  });
+
   it('rejects invalid symbols', () => {
     expect(validateTicker('AAPL#')).toBe(false);
-    expect(validateTicker('123')).toBe(false);
     expect(validateTicker('')).toBe(false);
     expect(validateTicker('A')).toBe(false); // too short
-    expect(validateTicker('ABCDEF')).toBe(false); // too long
+    expect(validateTicker('ABCDEFGHIJK')).toBe(false); // 11 chars, too long
+    expect(validateTicker('.AAPL')).toBe(false); // starts with dot
+    expect(validateTicker('AAPL.')).toBe(false); // ends with dot
   });
 });
 

@@ -14,7 +14,7 @@ export function useFinancials(
     queryKey: ['financials', ticker, statement, period],
     queryFn: async () => {
       const response = await fetch(
-        `/api/financials?ticker=${ticker}&statement=${statement}&period=${period}`
+        `/api/financials?ticker=${encodeURIComponent(ticker)}&statement=${statement}&period=${period}`
       );
       if (!response.ok) {
         const error = await response.json();

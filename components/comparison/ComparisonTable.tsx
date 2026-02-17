@@ -1,6 +1,6 @@
 'use client';
 
-import { useOverview } from '@/lib/hooks/useOverview';
+import { useQueries } from '@tanstack/react-query';
 import { MetricRow } from './MetricRow';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorPanel } from '@/components/ui/ErrorPanel';
@@ -11,8 +11,23 @@ interface ComparisonTableProps {
 }
 
 export function ComparisonTable({ tickers }: ComparisonTableProps) {
-  // Fetch overview data for all tickers in parallel
-  const queries = tickers.map(ticker => useOverview(ticker));
+  // useQueries handles a dynamic number of queries without violating Rules of Hooks
+  const queries = useQueries({
+    queries: tickers.map(ticker => ({
+      queryKey: ['overview', ticker],
+      queryFn: async () => {
+        const response = await fetch(`/api/overview?ticker=${encodeURIComponent(ticker)}`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to fetch overview');
+        }
+        return response.json();
+      },
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      retry: 2,
+    })),
+  });
 
   const isLoading = queries.some(q => q.isLoading);
   const hasError = queries.some(q => q.error);

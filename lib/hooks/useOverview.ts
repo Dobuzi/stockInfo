@@ -10,7 +10,7 @@ export function useOverview(ticker: string) {
   return useQuery<OverviewResponse>({
     queryKey: ['overview', ticker],
     queryFn: async () => {
-      const response = await fetch(`/api/overview?ticker=${ticker}`);
+      const response = await fetch(`/api/overview?ticker=${encodeURIComponent(ticker)}`);
 
       if (!response.ok) {
         const error = await response.json();

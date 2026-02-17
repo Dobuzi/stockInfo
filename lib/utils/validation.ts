@@ -1,10 +1,10 @@
 export function validateTicker(ticker: string): boolean {
-  if (!ticker || ticker.length < 2 || ticker.length > 5) {
+  if (!ticker || ticker.length < 2 || ticker.length > 10) {
     return false;
   }
 
-  // Allow uppercase letters, dots, and hyphens only
-  const regex = /^[A-Z]+[.-]?[A-Z]*$/;
+  // Allow uppercase letters, digits, dots, and hyphens (supports international tickers like 005930.KS)
+  const regex = /^[A-Z0-9][A-Z0-9.-]*[A-Z0-9]$/;
   return regex.test(ticker);
 }
 

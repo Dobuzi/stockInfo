@@ -18,7 +18,7 @@ export function usePrices(ticker: string, range: TimeRange = '1M') {
   return useQuery<PriceResponse>({
     queryKey: ['prices', ticker, range],
     queryFn: async () => {
-      const response = await fetch(`/api/prices?ticker=${ticker}&range=${range}`);
+      const response = await fetch(`/api/prices?ticker=${encodeURIComponent(ticker)}&range=${range}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to fetch prices');

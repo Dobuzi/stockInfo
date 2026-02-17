@@ -19,6 +19,7 @@ import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorPanel } from '@/components/ui/ErrorPanel';
 import { DarkModeToggle } from '@/components/ui/DarkModeToggle';
 import { PortfolioTab } from '@/components/portfolio/PortfolioTab';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { TimeRange } from '@/lib/providers/interfaces';
 
 export default function DashboardPage() {
@@ -98,6 +99,7 @@ export default function DashboardPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        <ErrorBoundary>
         {activeTab === 'watchlist' && (
           <>
             <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
@@ -199,6 +201,7 @@ export default function DashboardPage() {
         {activeTab === 'portfolio' && (
           <PortfolioTab />
         )}
+        </ErrorBoundary>
       </main>
     </div>
   );
