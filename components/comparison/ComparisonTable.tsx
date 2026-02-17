@@ -5,6 +5,7 @@ import { MetricRow } from './MetricRow';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorPanel } from '@/components/ui/ErrorPanel';
 import { formatLargeNumber } from '@/lib/utils/formatting';
+import { computeBuffettScore } from '@/lib/utils/buffett-score';
 
 interface ComparisonTableProps {
   tickers: string[];
@@ -41,6 +42,14 @@ export function ComparisonTable({ tickers }: ComparisonTableProps) {
   }
 
   const data = queries.map(q => q.data?.data || null);
+  const scores = data.map(d => (d ? computeBuffettScore(d) : null));
+
+  const GRADE_COLORS = {
+    A: 'text-green-600 dark:text-green-400',
+    B: 'text-yellow-600 dark:text-yellow-400',
+    C: 'text-orange-600 dark:text-orange-400',
+    D: 'text-red-600 dark:text-red-400',
+  } as const;
 
   return (
     <div className="overflow-x-auto">
@@ -64,6 +73,22 @@ export function ComparisonTable({ tickers }: ComparisonTableProps) {
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+          <tr className="bg-blue-50 dark:bg-blue-900/20">
+            <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white sticky left-0 bg-blue-50 dark:bg-blue-900/20">
+              Buffett Score
+            </td>
+            {scores.map((score, idx) => (
+              <td key={tickers[idx]} className="px-4 py-3 text-right">
+                {score ? (
+                  <span className={`font-bold text-base ${GRADE_COLORS[score.grade]}`}>
+                    {score.grade} {score.score.toFixed(1)}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">—</span>
+                )}
+              </td>
+            ))}
+          </tr>
           {/* Company Info Section */}
           <tr className="bg-gray-100 dark:bg-gray-800">
             <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
