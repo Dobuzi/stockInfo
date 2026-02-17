@@ -1,9 +1,9 @@
 'use client';
 
-import { computeBuffettScore } from '@/lib/utils/buffett-score';
+import { computeValueScore } from '@/lib/utils/value-score';
 import type { OverviewData } from '@/lib/transformers/overview';
 
-interface BuffettScoreBadgeProps {
+interface ValueScoreBadgeProps {
   overview: OverviewData | null;
 }
 
@@ -14,17 +14,17 @@ const GRADE_COLORS = {
   D: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
 } as const;
 
-export function BuffettScoreBadge({ overview }: BuffettScoreBadgeProps) {
+export function ValueScoreBadge({ overview }: ValueScoreBadgeProps) {
   if (!overview) return null;
-  const result = computeBuffettScore(overview);
+  const result = computeValueScore(overview);
   if (!result) return null;
 
   return (
     <span
       className={`text-xs font-bold px-1.5 py-0.5 rounded ${GRADE_COLORS[result.grade]}`}
-      title={`Quality Score: ${result.score.toFixed(1)}/10`}
+      title={`Value Score: ${result.score.toFixed(1)}/10`}
     >
-      Q:{result.grade} {result.score.toFixed(1)}
+      V:{result.grade} {result.score.toFixed(1)}
     </span>
   );
 }
