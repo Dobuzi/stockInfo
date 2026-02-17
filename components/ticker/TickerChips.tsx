@@ -1,6 +1,7 @@
 'use client';
 
 import { BuffettScoreBadge } from '@/components/ui/BuffettScoreBadge';
+import { ValueScoreBadge } from '@/components/ui/ValueScoreBadge';
 import type { OverviewData } from '@/lib/transformers/overview';
 
 interface TickerChipsProps {
@@ -37,6 +38,9 @@ export function TickerChips({ tickers, onRemove, selectedTicker, onSelect, overv
             {ticker}
             {overviews?.[ticker] !== undefined && (
               <BuffettScoreBadge overview={overviews[ticker] ?? null} />
+            )}
+            {overviews?.[ticker] !== undefined && (
+              <ValueScoreBadge overview={overviews[ticker] ?? null} />
             )}
           </button>
           <button
