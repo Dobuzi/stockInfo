@@ -69,4 +69,21 @@ test.describe('Stock Dashboard Smoke Tests', () => {
         .or(page.getByText(/Comparison View|Company Information|Failed to load/i))
     ).toBeVisible({ timeout: 8000 });
   });
+
+  test('Buffett score badge appears on ticker chip after overview loads', async ({ page }) => {
+    await page.goto('/');
+
+    // Add AAPL
+    await page.fill('input[placeholder*="ticker"]', 'AAPL');
+    await page.click('button:has-text("Add")');
+    await expect(page.getByRole('button', { name: 'AAPL', exact: true })).toBeVisible();
+
+    // Wait for badge — it appears once overview API responds (up to 10s)
+    await expect(
+      page.locator('[title*="Buffett Score"]')
+    ).toBeVisible({ timeout: 10000 });
+
+    // App must not crash
+    await expect(page.locator('text="Application error"')).not.toBeVisible();
+  });
 });
