@@ -28,6 +28,8 @@ const BREAKDOWN_ROWS = [
 export function BuffettScoreCard({ overview }: BuffettScoreCardProps) {
   const [expanded, setExpanded] = useState(false);
   const result = computeBuffettScore(overview);
+  const FINANCIAL_SECTORS = ['Financial Services', 'Banking', 'Insurance'];
+  const isFinancial = FINANCIAL_SECTORS.some(s => overview.sector === s);
 
   if (!result) return null;
 
@@ -65,7 +67,7 @@ export function BuffettScoreCard({ overview }: BuffettScoreCardProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {BREAKDOWN_ROWS.map(({ key, label, weight, field, fmt }) => {
+              {BREAKDOWN_ROWS.filter(({ key }) => !(key === 'debtToEquity' && isFinancial)).map(({ key, label, weight, field, fmt }) => {
                 const rawValue = overview[field as keyof OverviewData] as number | null;
                 const subScore = result.breakdown[key as keyof typeof result.breakdown];
                 return (

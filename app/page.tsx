@@ -60,11 +60,10 @@ export default function DashboardPage() {
   const overviewQueries = useQueries({
     queries: tickers.map(ticker => ({
       queryKey: ['overview', ticker],
-      queryFn: async (): Promise<OverviewData | null> => {
+      queryFn: async () => {
         const res = await fetch(`/api/overview?ticker=${encodeURIComponent(ticker)}`);
         if (!res.ok) return null;
-        const json: { ticker: string; provider: string; data: OverviewData } = await res.json();
-        return json.data;
+        return res.json() as Promise<{ ticker: string; provider: string; data: OverviewData } | null>;
       },
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
@@ -75,7 +74,7 @@ export default function DashboardPage() {
 
   const overviewsByTicker: Record<string, OverviewData | null> = {};
   tickers.forEach((ticker, i) => {
-    overviewsByTicker[ticker] = overviewQueries[i]?.data ?? null;
+    overviewsByTicker[ticker] = overviewQueries[i]?.data?.data ?? null;
   });
 
   const { data: priceData, isLoading: pricesLoading, error: pricesError } = usePrices(
