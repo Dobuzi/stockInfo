@@ -34,7 +34,7 @@ function toGrade(score: number): 'A' | 'B' | 'C' | 'D' {
   return 'D';
 }
 
-const FINANCIAL_SECTORS = ['Financial Services', 'Banking', 'Insurance'];
+export const FINANCIAL_SECTORS = ['Financial Services', 'Banking', 'Insurance'];
 
 export function computeBuffettScore(overview: OverviewData): BuffettScore | null {
   const isFinancial = FINANCIAL_SECTORS.some(s => overview.sector === s);

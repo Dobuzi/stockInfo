@@ -22,7 +22,7 @@ import { DarkModeToggle } from '@/components/ui/DarkModeToggle';
 import { PortfolioTab } from '@/components/portfolio/PortfolioTab';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useOverview } from '@/lib/hooks/useOverview';
-import { BuffettScoreCard } from '@/components/ui/BuffettScoreCard';
+import { QualityValueCard } from '@/components/ui/QualityValueCard';
 import { TimeRange } from '@/lib/providers/interfaces';
 import type { OverviewData } from '@/lib/transformers/overview';
 
@@ -196,7 +196,7 @@ export default function DashboardPage() {
                 </section>
 
                 {overviewData?.data && (
-                  <BuffettScoreCard overview={overviewData.data} />
+                  <QualityValueCard overview={overviewData.data} />
                 )}
 
                 <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
