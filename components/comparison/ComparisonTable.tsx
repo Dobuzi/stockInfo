@@ -12,6 +12,46 @@ interface ComparisonTableProps {
   tickers: string[];
 }
 
+const GRADE_COLORS = {
+  A: 'text-green-600 dark:text-green-400',
+  B: 'text-yellow-600 dark:text-yellow-400',
+  C: 'text-orange-600 dark:text-orange-400',
+  D: 'text-red-600 dark:text-red-400',
+} as const;
+
+interface GradedScore {
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D';
+}
+
+interface ScoreRowProps {
+  label: string;
+  scores: (GradedScore | null)[];
+  tickers: string[];
+  bgColor: string;
+}
+
+function ScoreRow({ label, scores, tickers, bgColor }: ScoreRowProps) {
+  return (
+    <tr className={bgColor}>
+      <td className={`px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white sticky left-0 ${bgColor}`}>
+        {label}
+      </td>
+      {scores.map((score, idx) => (
+        <td key={tickers[idx]} className="px-4 py-3 text-right">
+          {score ? (
+            <span className={`font-bold text-base ${GRADE_COLORS[score.grade]}`}>
+              {score.grade} {score.score.toFixed(1)}
+            </span>
+          ) : (
+            <span className="text-gray-400">—</span>
+          )}
+        </td>
+      ))}
+    </tr>
+  );
+}
+
 export function ComparisonTable({ tickers }: ComparisonTableProps) {
   // useQueries handles a dynamic number of queries without violating Rules of Hooks
   const queries = useQueries({
@@ -43,15 +83,8 @@ export function ComparisonTable({ tickers }: ComparisonTableProps) {
   }
 
   const data = queries.map(q => q.data?.data || null);
-  const scores = data.map(d => (d ? computeBuffettScore(d) : null));
+  const buffettScores = data.map(d => (d ? computeBuffettScore(d) : null));
   const valueScores = data.map(d => (d ? computeValueScore(d) : null));
-
-  const GRADE_COLORS = {
-    A: 'text-green-600 dark:text-green-400',
-    B: 'text-yellow-600 dark:text-yellow-400',
-    C: 'text-orange-600 dark:text-orange-400',
-    D: 'text-red-600 dark:text-red-400',
-  } as const;
 
   return (
     <div className="overflow-x-auto">
@@ -75,38 +108,18 @@ export function ComparisonTable({ tickers }: ComparisonTableProps) {
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr className="bg-blue-50 dark:bg-blue-900/20">
-            <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white sticky left-0 bg-blue-50 dark:bg-blue-900/20">
-              Buffett Score
-            </td>
-            {scores.map((score, idx) => (
-              <td key={tickers[idx]} className="px-4 py-3 text-right">
-                {score ? (
-                  <span className={`font-bold text-base ${GRADE_COLORS[score.grade]}`}>
-                    {score.grade} {score.score.toFixed(1)}
-                  </span>
-                ) : (
-                  <span className="text-gray-400">—</span>
-                )}
-              </td>
-            ))}
-          </tr>
-          <tr className="bg-purple-50 dark:bg-purple-900/20">
-            <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white sticky left-0 bg-purple-50 dark:bg-purple-900/20">
-              Value Score
-            </td>
-            {valueScores.map((score, idx) => (
-              <td key={tickers[idx]} className="px-4 py-3 text-right">
-                {score ? (
-                  <span className={`font-bold text-base ${GRADE_COLORS[score.grade]}`}>
-                    {score.grade} {score.score.toFixed(1)}
-                  </span>
-                ) : (
-                  <span className="text-gray-400">—</span>
-                )}
-              </td>
-            ))}
-          </tr>
+          <ScoreRow
+            label="Buffett Score"
+            scores={buffettScores}
+            tickers={tickers}
+            bgColor="bg-blue-50 dark:bg-blue-900/20"
+          />
+          <ScoreRow
+            label="Value Score"
+            scores={valueScores}
+            tickers={tickers}
+            bgColor="bg-purple-50 dark:bg-purple-900/20"
+          />
           {/* Company Info Section */}
           <tr className="bg-gray-100 dark:bg-gray-800">
             <td colSpan={tickers.length + 1} className="px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
