@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const primary = getPriceProvider();
     const stooq = new StooqProvider();
 
-    const { result: prices, provider } = await cachePrices(ticker, range, async () => {
+    const prices = await cachePrices(ticker, range, async () => {
       const { result, provider } = await withFallback(
         { name: process.env.PRICE_PROVIDER ?? 'finnhub', fn: () => primary.getPrices(ticker, range) },
         { name: 'stooq', fn: () => stooq.getPrices(ticker, range) }

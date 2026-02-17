@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const primary = getOverviewProvider();
     const fallback = new AlphaVantageProvider();
 
-    const { result: data, provider } = await cacheOverview(ticker, async () => {
+    const data = await cacheOverview(ticker, async () => {
       const { result, provider } = await withFallback(
         { name: process.env.OVERVIEW_PROVIDER ?? 'fmp', fn: () => primary.getOverview(ticker) },
         { name: 'alpha_vantage', fn: () => fallback.getOverview(ticker) }
