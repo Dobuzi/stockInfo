@@ -74,6 +74,6 @@ export async function GET(request: NextRequest) {
       statusCode = 503;
     }
 
-    return NextResponse.json({ error: errorMessage, ticker }, { status: statusCode });
+    return NextResponse.json({ error: errorMessage, ticker, detail: error.message }, { status: statusCode });
   }
 }
