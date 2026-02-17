@@ -1,13 +1,17 @@
 'use client';
 
+import { BuffettScoreBadge } from '@/components/ui/BuffettScoreBadge';
+import type { OverviewData } from '@/lib/transformers/overview';
+
 interface TickerChipsProps {
   tickers: string[];
   onRemove: (ticker: string) => void;
   selectedTicker?: string;
   onSelect?: (ticker: string) => void;
+  overviews?: Record<string, OverviewData | null>;
 }
 
-export function TickerChips({ tickers, onRemove, selectedTicker, onSelect }: TickerChipsProps) {
+export function TickerChips({ tickers, onRemove, selectedTicker, onSelect, overviews }: TickerChipsProps) {
   if (tickers.length === 0) {
     return (
       <p className="text-gray-500 dark:text-gray-400 text-sm">
@@ -19,11 +23,11 @@ export function TickerChips({ tickers, onRemove, selectedTicker, onSelect }: Tic
   return (
     <div className="flex flex-wrap gap-2">
       {tickers.map((ticker) => (
-        <div key={ticker} className="flex items-center gap-2">
+        <div key={ticker} className="flex items-center gap-1">
           <button
             onClick={() => onSelect?.(ticker)}
             className={`
-              px-3 py-1 rounded-full text-sm font-medium transition-all
+              flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium transition-all
               ${selectedTicker === ticker
                 ? 'bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-50 dark:ring-offset-gray-900'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -31,6 +35,9 @@ export function TickerChips({ tickers, onRemove, selectedTicker, onSelect }: Tic
             `}
           >
             {ticker}
+            {overviews?.[ticker] !== undefined && (
+              <BuffettScoreBadge overview={overviews[ticker] ?? null} />
+            )}
           </button>
           <button
             onClick={() => onRemove(ticker)}

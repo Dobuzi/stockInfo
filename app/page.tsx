@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { useTickers } from '@/lib/hooks/useTickers';
 import { usePrices } from '@/lib/hooks/usePrices';
 import { useFinancials } from '@/lib/hooks/useFinancials';
@@ -21,6 +22,7 @@ import { DarkModeToggle } from '@/components/ui/DarkModeToggle';
 import { PortfolioTab } from '@/components/portfolio/PortfolioTab';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { TimeRange } from '@/lib/providers/interfaces';
+import type { OverviewData } from '@/lib/transformers/overview';
 
 export default function DashboardPage() {
   const { tickers, addTicker, removeTicker } = useTickers();
@@ -50,6 +52,29 @@ export default function DashboardPage() {
   }, [tickers.length]);
 
   const activeTicker = selectedTicker || tickers[0] || '';
+
+  // Fetch overviews for all tickers so chips can show Buffett scores.
+  // React Query deduplicates: ComparisonTable hits the same cache keys.
+  const overviewQueries = useQueries({
+    queries: tickers.map(ticker => ({
+      queryKey: ['overview', ticker],
+      queryFn: async (): Promise<OverviewData | null> => {
+        const res = await fetch(`/api/overview?ticker=${encodeURIComponent(ticker)}`);
+        if (!res.ok) return null;
+        const json: { ticker: string; provider: string; data: OverviewData } = await res.json();
+        return json.data;
+      },
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      retry: 2,
+      enabled: tickers.length > 0,
+    })),
+  });
+
+  const overviewsByTicker: Record<string, OverviewData | null> = {};
+  tickers.forEach((ticker, i) => {
+    overviewsByTicker[ticker] = overviewQueries[i]?.data ?? null;
+  });
 
   const { data: priceData, isLoading: pricesLoading, error: pricesError } = usePrices(
     showDetail ? selectedTicker! : '',
@@ -117,6 +142,7 @@ export default function DashboardPage() {
                       setSelectedTicker(ticker); // Select → show detail
                     }
                   }}
+                  overviews={overviewsByTicker}
                 />
               </div>
             </section>
