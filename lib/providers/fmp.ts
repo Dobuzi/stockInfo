@@ -23,15 +23,23 @@ export class FMPProvider implements IFinancialProvider, IOverviewProvider {
   async getOverview(ticker: string): Promise<OverviewData> {
     const normalizedTicker = ticker.replace('-', '.');
 
-    // FMP requires multiple endpoints to build complete overview
-    const [profile, quote, ratios, metrics] = await Promise.all([
+    // Fetch core data (required) and supplementary data (optional) separately
+    // so a failed ratios/metrics call does not take down the whole response
+    const [profile, quote] = await Promise.all([
       this.fetchProfile(normalizedTicker),
       this.fetchQuote(normalizedTicker),
-      this.fetchRatios(normalizedTicker),
-      this.fetchKeyMetrics(normalizedTicker),
     ]);
 
-    // Transform to Alpha Vantage-like format for compatibility
+    // Supplementary endpoints — swallow failures (free tier may not include them)
+    const [ratios, metrics] = await Promise.allSettled([
+      this.fetchRatios(normalizedTicker),
+      this.fetchKeyMetrics(normalizedTicker),
+    ]).then(results => results.map(r => (r.status === 'fulfilled' ? r.value : [])));
+
+    const r = (ratios as any[])[0] ?? {};
+    const m = (metrics as any[])[0] ?? {};
+    const price = quote.price || 1; // avoid divide-by-zero
+
     const raw = {
       Name: profile.companyName,
       Sector: profile.sector,
@@ -40,27 +48,27 @@ export class FMPProvider implements IFinancialProvider, IOverviewProvider {
       '52WeekHigh': String(quote.yearHigh || 0),
       '52WeekLow': String(quote.yearLow || 0),
       Volume: String(quote.avgVolume || 0),
-      PERatio: String(quote.pe || ratios[0]?.peRatioTTM || 0),
-      ForwardPE: String(ratios[0]?.forwardPE || 0),
-      PEGRatio: String(ratios[0]?.pegRatio || 0),
-      PriceToBookRatio: String(quote.priceToBook || ratios[0]?.priceToBookRatioTTM || 0),
-      PriceToSalesRatioTTM: String(ratios[0]?.priceToSalesRatioTTM || 0),
-      EVToEBITDA: String(ratios[0]?.enterpriseValueOverEBITDATTM || 0),
-      ProfitMargin: String((ratios[0]?.netProfitMarginTTM || 0) / 100), // FMP uses whole numbers
-      OperatingMarginTTM: String((ratios[0]?.operatingProfitMarginTTM || 0) / 100),
-      ReturnOnEquityTTM: String((ratios[0]?.returnOnEquityTTM || 0) / 100),
-      ReturnOnAssetsTTM: String((ratios[0]?.returnOnAssetsTTM || 0) / 100),
-      RevenueTTM: String(metrics[0]?.revenuePerShareTTM * profile.mktCap / quote.price || 0),
-      QuarterlyRevenueGrowthYOY: String((ratios[0]?.revenueGrowthTTM || 0) / 100),
-      QuarterlyEarningsGrowthYOY: String((ratios[0]?.earningsGrowthTTM || 0) / 100),
+      PERatio: String(quote.pe || r.peRatioTTM || 0),
+      ForwardPE: String(r.forwardPE || 0),
+      PEGRatio: String(r.pegRatio || 0),
+      PriceToBookRatio: String(quote.priceToBook || r.priceToBookRatioTTM || 0),
+      PriceToSalesRatioTTM: String(r.priceToSalesRatioTTM || 0),
+      EVToEBITDA: String(r.enterpriseValueOverEBITDATTM || 0),
+      ProfitMargin: String((r.netProfitMarginTTM || 0) / 100),
+      OperatingMarginTTM: String((r.operatingProfitMarginTTM || 0) / 100),
+      ReturnOnEquityTTM: String((r.returnOnEquityTTM || 0) / 100),
+      ReturnOnAssetsTTM: String((r.returnOnAssetsTTM || 0) / 100),
+      RevenueTTM: String((m.revenuePerShareTTM || 0) * (profile.mktCap || 0) / price || 0),
+      QuarterlyRevenueGrowthYOY: String((r.revenueGrowthTTM || 0) / 100),
+      QuarterlyEarningsGrowthYOY: String((r.earningsGrowthTTM || 0) / 100),
       DilutedEPSTTM: String(quote.eps || 0),
-      DebtToEquity: String(ratios[0]?.debtEquityRatioTTM || 0),
-      CurrentRatio: String(ratios[0]?.currentRatioTTM || 0),
-      QuickRatio: String(ratios[0]?.quickRatioTTM || 0),
-      BookValue: String(metrics[0]?.bookValuePerShareTTM || 0),
-      DividendYield: String((profile.lastDiv / quote.price) || 0),
+      DebtToEquity: String(r.debtEquityRatioTTM || 0),
+      CurrentRatio: String(r.currentRatioTTM || 0),
+      QuickRatio: String(r.quickRatioTTM || 0),
+      BookValue: String(m.bookValuePerShareTTM || 0),
+      DividendYield: String((profile.lastDiv || 0) / price || 0),
       DividendPerShare: String(profile.lastDiv || 0),
-      PayoutRatio: String((ratios[0]?.payoutRatioTTM || 0) / 100),
+      PayoutRatio: String((r.payoutRatioTTM || 0) / 100),
     };
 
     return transformOverview(raw);
@@ -174,6 +182,10 @@ export class FMPProvider implements IFinancialProvider, IOverviewProvider {
         return response.json();
       })
     );
+    // FMP returns {"Error Message": "..."} for auth errors
+    if (data?.['Error Message']) {
+      throw new Error(`FMP API error: ${data['Error Message']}`);
+    }
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error(`Invalid ticker: ${ticker}`);
     }
@@ -189,6 +201,9 @@ export class FMPProvider implements IFinancialProvider, IOverviewProvider {
         return response.json();
       })
     );
+    if (data?.['Error Message']) {
+      throw new Error(`FMP API error: ${data['Error Message']}`);
+    }
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error(`Invalid ticker: ${ticker}`);
     }

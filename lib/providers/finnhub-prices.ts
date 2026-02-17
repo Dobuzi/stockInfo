@@ -35,6 +35,14 @@ export class FinnhubPriceProvider implements IPriceProvider {
       })
     );
 
+    // Finnhub returns {error: "..."} for auth/rate-limit issues
+    if (data.error) {
+      if (data.error.toLowerCase().includes('limit') || data.error.toLowerCase().includes('rate')) {
+        throw new Error('API rate limit exceeded');
+      }
+      throw new Error(`Finnhub API error: ${data.error}`);
+    }
+
     if (data.s === 'no_data') {
       throw new Error(`Invalid ticker: ${ticker}`);
     }
