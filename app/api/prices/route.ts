@@ -26,18 +26,16 @@ export async function GET(request: NextRequest) {
     const primary = getPriceProvider();
     const stooq = new StooqProvider();
 
-    const prices = await cachePrices(ticker, range, async () => {
+    const cached = await cachePrices(ticker, range, async () => {
       const { result, provider } = await withFallback(
         { name: process.env.PRICE_PROVIDER ?? 'finnhub', fn: () => primary.getPrices(ticker, range) },
         { name: 'stooq', fn: () => stooq.getPrices(ticker, range) }
       );
-      // attach provider name so cache wrapper can pass it through
-      (result as any).__provider = provider;
-      return result;
+      return { prices: result, provider };
     });
 
-    const providerUsed = (prices as any).__provider ?? 'unknown';
-    const cleanPrices = prices.filter((p: any) => p.__provider === undefined || true).map(({ __provider, ...p }: any) => p);
+    const providerUsed = cached.provider ?? 'unknown';
+    const cleanPrices = cached.prices;
 
     const transformed = transformPriceData(cleanPrices);
 
@@ -74,6 +72,6 @@ export async function GET(request: NextRequest) {
       statusCode = 503;
     }
 
-    return NextResponse.json({ error: errorMessage, ticker, detail: error.message }, { status: statusCode });
+    return NextResponse.json({ error: errorMessage, ticker }, { status: statusCode });
   }
 }

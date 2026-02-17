@@ -62,6 +62,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ error: errorMessage, ticker, detail: (error as any).message }, { status: statusCode });
+    return NextResponse.json({ error: errorMessage, ticker }, { status: statusCode });
   }
 }
