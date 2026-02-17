@@ -53,7 +53,9 @@ export async function GET(request: NextRequest) {
         error.message.includes('API_KEY') ||
         error.message.includes('API KEY') ||
         error.message.includes('not set') ||
-        error.message.includes('Invalid API')
+        error.message.includes('Invalid API') ||
+        error.message.includes('Forbidden') ||
+        error.message.includes('403')
       ) {
         errorMessage = 'Overview service configuration error. Please check API keys.';
         statusCode = 503;
