@@ -21,6 +21,8 @@ import { ErrorPanel } from '@/components/ui/ErrorPanel';
 import { DarkModeToggle } from '@/components/ui/DarkModeToggle';
 import { PortfolioTab } from '@/components/portfolio/PortfolioTab';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { useOverview } from '@/lib/hooks/useOverview';
+import { BuffettScoreCard } from '@/components/ui/BuffettScoreCard';
 import { TimeRange } from '@/lib/providers/interfaces';
 import type { OverviewData } from '@/lib/transformers/overview';
 
@@ -88,6 +90,7 @@ export default function DashboardPage() {
     showDetail ? selectedTicker! : '',
     newsWindow
   );
+  const { data: overviewData } = useOverview(showDetail ? selectedTicker! : '');
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -192,6 +195,10 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </section>
+
+                {overviewData?.data && (
+                  <BuffettScoreCard overview={overviewData.data} />
+                )}
 
                 <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Financial Statements</h2>
